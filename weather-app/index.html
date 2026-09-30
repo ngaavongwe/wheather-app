@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WeatherSphere - Real-time weather, forecasts, air quality, and local time for any city worldwide using OpenWeather API.">
+  <title>WeatherSphere - Real-Time Weather & Forecast</title>
+
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- APP HEADER -->
+    <header class="header">
+      <div class="brand">
+        <h1 class="brand-title">
+          <span>🌤️ WeatherSphere</span>
+        </h1>
+        <p class="brand-subtitle">Real-time weather, wherever you are.</p>
+      </div>
+
+      <div class="controls-group">
+        <!-- °C / °F Unit Toggle -->
+        <div class="unit-toggle" role="group" aria-label="Temperature unit selection">
+          <button type="button" id="unitCelsiusBtn" class="unit-btn active" aria-pressed="true" title="Celsius (°C)">°C</button>
+          <button type="button" id="unitFahrenheitBtn" class="unit-btn" aria-pressed="false" title="Fahrenheit (°F)">°F</button>
+        </div>
+
+        <!-- Dark / Light Mode Toggle Button -->
+        <button type="button" id="themeToggleBtn" class="btn-toggle" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">
+          <span id="themeIcon">🌙</span> <span id="themeLabel">Dark Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- SEARCH SECTION -->
+      <section class="search-card" aria-label="Search city weather">
+        <form id="searchForm" class="search-form" action="#" method="get">
+          <div class="input-wrapper">
+            <label for="cityInput" class="sr-only">Enter city name</label>
+            <input 
+              type="text" 
+              id="cityInput" 
+              class="search-input" 
+              placeholder="Enter city name (e.g. Bulawayo, London, Tokyo)" 
+              autocomplete="off" 
+              required
+            >
+          </div>
+          <button type="submit" id="searchBtn" class="btn-search">
+            <span>🔍 Search</span>
+          </button>
+          <button type="button" id="locationBtn" class="btn-location" title="Use your current geographic location">
+            <span>📍 Use My Location</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- NOTIFICATION / ERROR MESSAGES BANNER -->
+      <div id="messageBanner" class="message-banner" role="status" aria-live="polite" style="display: none;"></div>
+
+      <!-- LOADING SPINNER -->
+      <div id="loadingContainer" class="loading-container" style="display: none;" role="alert" aria-busy="true">
+        <div class="spinner"></div>
+        <p>Fetching weather data...</p>
+      </div>
+
+      <!-- CURRENT WEATHER CARD -->
+      <article id="weatherCard" class="weather-card" style="display: none;" aria-label="Current Weather Information">
+        <div class="location-header">
+          <div>
+            <div class="location-title">
+              <h2 id="cityName" class="city-name">--</h2>
+              <button type="button" id="favoriteToggleBtn" class="btn-favorite" aria-label="Favorite this city" title="Toggle Favorite">⭐</button>
+            </div>
+            <p id="localTime" class="local-time">🕒 <span>--</span></p>
+          </div>
+        </div>
+
+        <div class="hero-weather">
+          <div class="temperature-wrap">
+            <span id="tempValue" class="temp-value">--</span>
+            <span id="tempUnit" class="temp-unit">°C</span>
+          </div>
+
+          <div class="condition-wrap">
+            <img id="weatherIcon" class="weather-icon-img" src="" alt="Weather condition icon">
+            <p id="weatherCondition" class="condition-text">--</p>
+            <p id="feelsLike" class="feels-like-text">Feels like: --</p>
+          </div>
+        </div>
+
+        <!-- DETAILED WEATHER METRICS -->
+        <dl class="metrics-grid">
+          <div class="metric-item">
+            <dt class="metric-label">💧 Humidity</dt>
+            <dd id="humidityValue" class="metric-value">--</dd>
+          </div>
+          <div class="metric-item">
+            <dt class="metric-label">💨 Wind Speed</dt>
+            <dd id="windValue" class="metric-value">--</dd>
+          </div>
+          <div class="metric-item">
+            <dt class="metric-label">⏲️ Pressure</dt>
+            <dd id="pressureValue" class="metric-value">--</dd>
+          </div>
+          <div class="metric-item">
+            <dt class="metric-label">👁️ Visibility</dt>
+            <dd id="visibilityValue" class="metric-value">--</dd>
+          </div>
+          <div class="metric-item">
+            <dt class="metric-label">🌅 Sunrise</dt>
+            <dd id="sunriseValue" class="metric-value">--</dd>
+          </div>
+          <div class="metric-item">
+            <dt class="metric-label">🌇 Sunset</dt>
+            <dd id="sunsetValue" class="metric-value">--</dd>
+          </div>
+        </dl>
+      </article>
+
+      <!-- AIR QUALITY CARD -->
+      <article id="aqiCard" class="aqi-card" style="display: none;" aria-label="Air Quality Information">
+        <h3 class="section-title">🍃 Air Quality Index (AQI)</h3>
+        <div class="aqi-header">
+          <div id="aqiBadge" class="aqi-badge level-1">--</div>
+          <p id="aqiDesc" class="aqi-desc">--</p>
+        </div>
+        <div class="aqi-components">
+          <div class="aqi-comp-item">
+            <div class="aqi-comp-name">PM2.5</div>
+            <div id="aqiPm25" class="aqi-comp-val">--</div>
+          </div>
+          <div class="aqi-comp-item">
+            <div class="aqi-comp-name">PM10</div>
+            <div id="aqiPm10" class="aqi-comp-val">--</div>
+          </div>
+          <div class="aqi-comp-item">
+            <div class="aqi-comp-name">O₃</div>
+            <div id="aqiO3" class="aqi-comp-val">--</div>
+          </div>
+          <div class="aqi-comp-item">
+            <div class="aqi-comp-name">NO₂</div>
+            <div id="aqiNo2" class="aqi-comp-val">--</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 5-DAY FORECAST SECTION -->
+      <section id="forecastSection" class="forecast-section" style="display: none;" aria-label="5-Day Forecast">
+        <h3 class="section-title">📅 5-Day Forecast</h3>
+        <div id="forecastGrid" class="forecast-grid">
+          <!-- 5 Forecast Cards populated dynamically -->
+        </div>
+      </section>
+
+      <!-- RECENT & FAVORITES GRID -->
+      <div class="sidebar-grid" style="margin-top: 1.5rem;">
+        <!-- RECENT SEARCHES -->
+        <section id="recentSearchesCard" class="saved-card" aria-label="Recent Searches">
+          <h3 class="section-title">🕒 Recent Searches</h3>
+          <div id="recentList" class="saved-list">
+            <span class="empty-state">No recent searches yet.</span>
+          </div>
+        </section>
+
+        <!-- FAVORITE CITIES -->
+        <section id="favoriteCitiesCard" class="saved-card" aria-label="Favorite Cities">
+          <h3 class="section-title">⭐ Favorite Cities</h3>
+          <div id="favoriteList" class="saved-list">
+            <span class="empty-state">No favorite cities saved. Click ⭐ to add one!</span>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>WeatherSphere &copy; 2026. Powered by OpenWeather API & Vanilla JavaScript ES6+.</p>
+    </footer>
+  </div>
+
+  <!-- MAIN SCRIPT -->
+  <script src="script.js"></script>
+</body>
+</html>
